@@ -8,13 +8,9 @@ if (!MONGODB_URI) {
 }
 
 declare global {
-  // این تایپ دقیق برای cached روی global
-  // conn: کانکشن mongoose یا null
-  // promise: پرامیس کانکشن یا null
-  // ممکنه کل mongoose هم undefined باشه
   var mongoose: {
-    conn: typeof mongoose | null;
-    promise: Promise<typeof mongoose> | null;
+    conn: typeof import('mongoose') | null;
+    promise: Promise<typeof import('mongoose')> | null;
   } | undefined;
 }
 
@@ -25,6 +21,11 @@ if (!cached) {
 }
 
 export async function connectToDatabase() {
+  // ✅ تضمین دوباره که cached همیشه تعریف شده باشه
+  if (!cached) {
+    cached = global.mongoose = { conn: null, promise: null };
+  }
+
   if (cached.conn) {
     return cached.conn;
   }
@@ -36,6 +37,7 @@ export async function connectToDatabase() {
 
     cached.promise = mongoose.connect(MONGODB_URI, opts);
   }
+
   cached.conn = await cached.promise;
   return cached.conn;
 }
