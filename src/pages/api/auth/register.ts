@@ -5,6 +5,16 @@ import { connectToDatabase } from '@/lib/db';
 import User from '@/models/User';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // ✅ هدرهای CORS
+  res.setHeader('Access-Control-Allow-Origin', '*'); // تو تولیدی بجاش دامنه دقیق بذار
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  // ✅ اگر درخواست Preflight بود، هندل کن
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).end();
   }
