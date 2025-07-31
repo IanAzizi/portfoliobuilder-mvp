@@ -1,16 +1,15 @@
 // src/pages/api/auth/register.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { connectToDatabase } from '@/lib/db';
 import User from '@/models/User';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // ✅ هدرهای CORS
-  res.setHeader('Access-Control-Allow-Origin', '*'); // تو تولیدی بجاش دامنه دقیق بذار
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  // ✅ اگر درخواست Preflight بود، هندل کن
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -37,5 +36,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const newUser = new User({ email, password: hashedPassword });
   await newUser.save();
 
-  return res.status(201).json({ message: 'User created.' });
+  // ✅ تولید JWT مثل login
+  const token = jwt.sign(
+    { userId: newUser._id, email: newUser.email },
+    process.env.JWT_SECRET as string,
+    { expiresIn: '1h' }
+  );
+
+  return res.status(201).json({ token });
 }
