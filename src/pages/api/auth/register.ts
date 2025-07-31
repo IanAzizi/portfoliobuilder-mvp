@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import { connectToDatabase } from '@/lib/db';
 import User from '@/models/User';
 
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -37,11 +38,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   await newUser.save();
 
   // ✅ تولید JWT مثل login
-  const token = jwt.sign(
-    { userId: newUser._id, email: newUser.email },
-    process.env.JWT_SECRET as string,
-    { expiresIn: '1h' }
-  );
+const token = jwt.sign(
+  { userId: newUser._id, email: newUser.email },
+  process.env.JWT_SECRET as string,
+  { expiresIn: '1h' }
+);
 
-  return res.status(201).json({ token });
+return res.status(201).json({ token }); // به جای فقط message
 }
